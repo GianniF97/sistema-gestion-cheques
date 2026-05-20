@@ -53,12 +53,12 @@ def cambiar_estado_cheque(numero, accion, entregado_a=None):
     cursor = conexion.cursor()
     fecha_hoy = datetime.date.today().strftime("%Y-%m-%d")
     
-    # Si la acción es depositar, el destino es el banco y el estado es 'depositado'
+   
     if accion == "Depositar en Banco":
         nuevo_estado = "depositado"
         destino = "Banco (Depósito)"
     else:
-        # Si no, es una entrega normal a un tercero
+        
         nuevo_estado = "entregado"
         destino = entregado_a
 
