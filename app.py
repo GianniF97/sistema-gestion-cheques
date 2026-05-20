@@ -1,3 +1,4 @@
+import pandas as pd
 import streamlit as st
 from main import registrar_cheque, listar_cheques, entregar_cheque
 
@@ -8,7 +9,7 @@ with st.form("formulario_cheques"):
     numero = st.text_input("Número de cheque")
     tipo = st.selectbox("Tipo de cheque", ["Físico", "Echeq"])
     emisor = st.text_input("Emisor del cheque (Quién firmó)")
-    banco = st.selectbox("Banco emisor", ["BBVA", "Banco Macro", "Banco Galicia", "Banco Santander", "Banco Patagonia", "Banco Ciudad", "HSBC", "Banco Comafi", "Banco Itaú", "Banco Credicoop","otro"])
+    banco = st.selectbox("Banco emisor", ["BBVA", "Banco Macro", "Banco Galicia", "Banco Santander", "Banco Patagonia", "Banco Ciudad", "HSBC", "Banco Comafi", "Banco Itaú", "Banco Credicoop", "otro"])
     monto = st.number_input("Monto")
     fecha_emision = st.date_input("Fecha de emisión")
     fecha_pago = st.date_input("Fecha de pago")
@@ -19,22 +20,41 @@ with st.form("formulario_cheques"):
         f_emision_txt = fecha_emision.strftime("%Y-%m-%d")
         f_pago_txt = fecha_pago.strftime("%Y-%m-%d")
         
+        exito, mensaje = registrar_cheque(numero, tipo, emisor, banco, monto, f_emision_txt, f_pago_txt)
         
-        registrar_cheque(numero, tipo, emisor, banco, monto, f_emision_txt, f_pago_txt)
-        st.success("Cheque registrado con éxito.")
+        if exito:
+            st.success(mensaje)
+            st.rerun() 
+        else:
+            st.error(mensaje)
 
 
-st.subheader(" Cheques Registrados en el Sistema")
+
+st.subheader("📋 Cheques Registrados en el Sistema")
 
 mis_cheques = listar_cheques()
 
 if mis_cheques:
-    st.dataframe(mis_cheques)
+   
+    columnas = [
+        "ID", "N° Cheque", "Tipo", "Emisor", "Banco Emisor", 
+        "Monto ($)", "F. Emisión", "F. Pago", "Estado", "Entregado a", "F. Entrega"
+    ]
+    
+   
+    df = pd.DataFrame(mis_cheques, columns=columnas)
+    
+   
+    df_visualizacion = df.drop(columns=["ID"])
+    
+   
+    st.dataframe(df_visualizacion, use_container_width=True)
 else:
     st.info("Aún no hay cheques registrados en el sistema.")
 
 
-st.subheader("Entregar Cheque a Terceros")
+
+st.subheader("🤝 Entregar Cheque a Terceros")
 
 with st.form("formulario_entrega"):
     num_cheque_entrega = st.text_input("Número del cheque a entregar")
