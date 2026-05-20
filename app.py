@@ -1,6 +1,6 @@
 import pandas as pd
 import streamlit as st
-from main import registrar_cheque, listar_cheques, entregar_cheque
+from main import registrar_cheque, listar_cheques, cambiar_estado_cheque
 
 st.title("Formulario de Cheques")
 
@@ -27,6 +27,7 @@ with st.form("formulario_cheques"):
             st.rerun() 
         else:
             st.error(mensaje)
+    
 
 
 
@@ -64,8 +65,36 @@ with st.form("formulario_entrega"):
     
     if boton_entregar:
         if num_cheque_entrega and persona_destino:
-            entregar_cheque(num_cheque_entrega, persona_destino)
+            cambiar_estado_cheque(num_cheque_entrega, persona_destino)
             st.success(f"¡Cheque N° {num_cheque_entrega} marcado como entregado a {persona_destino}!")
             st.rerun()
         else:
             st.error("Por favor, completa ambos campos para realizar la entrega.")
+
+
+st.subheader("🔄 Cambiar Estado del Cheque (Depositar / Entregar)")
+
+with st.form("formulario_destino"):
+    num_cheque_entrega = st.text_input("Número del cheque a procesar")
+    
+    accion = st.radio("¿Qué acción desea realizar?", ["Depositar en Banco", "Entregar a Tercero"])
+    
+  
+    persona_destino = st.text_input("¿A quién se lo entregamos? (Opcional si va al banco)")
+    
+    boton_procesar = st.form_submit_button("Confirmar Operación")
+    
+    if boton_procesar:
+        if num_cheque_entrega:
+           
+            if accion == "Entregar a Tercero" and not persona_destino:
+                st.error("Por favor, ingresa el nombre del tercero al que le entregas el cheque.")
+            else:
+              
+                from main import cambiar_estado_cheque 
+                cambiar_estado_cheque(num_cheque_entrega, accion, persona_destino)
+                
+                st.success(f"¡Cheque N° {num_cheque_entrega} procesado con éxito como: {accion}!")
+                st.rerun()
+        else:
+            st.error("Por favor, ingresa el número de cheque.")

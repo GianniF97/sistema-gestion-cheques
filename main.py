@@ -48,20 +48,29 @@ def registrar_cheque(numero, tipo, emisor, banco, monto, fecha_emision, fecha_pa
 
 
 
-def entregar_cheque(numero, entregado_a):
+def cambiar_estado_cheque(numero, accion, entregado_a=None):
     conexion = sqlite3.connect("cheques.db")
     cursor = conexion.cursor()
     fecha_hoy = datetime.date.today().strftime("%Y-%m-%d")
     
+    # Si la acción es depositar, el destino es el banco y el estado es 'depositado'
+    if accion == "Depositar en Banco":
+        nuevo_estado = "depositado"
+        destino = "Banco (Depósito)"
+    else:
+        # Si no, es una entrega normal a un tercero
+        nuevo_estado = "entregado"
+        destino = entregado_a
+
     cursor.execute("""
         UPDATE cheques
-        SET estado = 'entregado', entregado_a = ?, fecha_entrega = ?
+        SET estado = ?, entregado_a = ?, fecha_entrega = ?
         WHERE numero = ?
-    """, (entregado_a, fecha_hoy, numero))
+    """, (nuevo_estado, destino, fecha_hoy, numero))
     
     conexion.commit()
     conexion.close()
-    print("Cheque entregado con éxito.")
+    print(f"Cheque N° {numero} actualizado a {nuevo_estado}.")
 
 
 
