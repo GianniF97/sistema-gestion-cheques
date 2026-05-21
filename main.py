@@ -1,85 +1,88 @@
-import sqlite3
 import datetime
+from supabase import create_client, Client
 
 
-conexion = sqlite3.connect("cheques.db")
-cursor = conexion.cursor()
+SUPABASE_URL = "https://ezwblubdgtmcucpyxulj.supabase.co"
+SUPABASE_KEY = "sb_publishable_-IdHxHC9-0yMOqQvwCVyTw_2blp9qQz"
 
-cursor.execute("""
-    CREATE TABLE IF NOT EXISTS cheques (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        numero TEXT NOT NULL UNIQUE,
-        tipo TEXT NOT NULL,
-        emisor TEXT NOT NULL,
-        banco TEXT NOT NULL,
-        monto REAL NOT NULL,
-        fecha_emision TEXT,
-        fecha_pago TEXT NOT NULL,
-        estado TEXT NOT NULL,
-        entregado_a TEXT,
-        fecha_entrega TEXT
-    )
-""")
-
-conexion.commit()
-conexion.close()
-
-print("¡Base de datos creada con éxito!")
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 
 
 def registrar_cheque(numero, tipo, emisor, banco, monto, fecha_emision, fecha_pago):
-    conexion = sqlite3.connect("cheques.db")
-    cursor = conexion.cursor()
-    
     try:
-        cursor.execute("""
-            INSERT INTO cheques (numero, tipo, emisor, banco, monto, fecha_emision, fecha_pago, estado)
-            VALUES (?, ?, ?, ?, ?, ?, ?, 'pendiente')
-        """, (numero, tipo, emisor, banco, monto, fecha_emision, fecha_pago))
+        # FORZAR CONVERSIÓN: Asegura que si viene como texto o float impreciso, 
+        # se transforme en un flotante puro de Python (ej: 150000.0)
+        monto_limpio = float(monto)
         
-        conexion.commit()
-        conexion.close()
-        return True, "Cheque registrado con éxito."
+        data, count = supabase.table("cheques").insert({
+            "numero": numero,
+            "tipo": tipo,
+            "emisor": emisor,
+            "banco": banco,
+            "monto": monto_limpio,  # Usamos la variable limpia aquí
+            "fecha_emision": fecha_emision,
+            "fecha_pago": fecha_pago,
+            "estado": "pendiente"
+        }).execute()
         
-    except sqlite3.IntegrityError:
-        conexion.close()
-        return False, f"El cheque N° {numero} ya se encuentra registrado en el sistema."
+        return True, "Cheque registrado con éxito en la nube."
+        
+    except Exception as e:
+        return False, f"Error al registrar: Asegúrese de que el N° {numero} no esté repetido."
+        
+        return True, "Cheque registrado con éxito en la nube."
+        
+    except Exception as e:
+       
+        return False, f"Error al registrar: Asegúrese de que el N° {numero} no esté repetido."
 
 
 
 def cambiar_estado_cheque(numero, accion, entregado_a=None):
-    conexion = sqlite3.connect("cheques.db")
-    cursor = conexion.cursor()
     fecha_hoy = datetime.date.today().strftime("%Y-%m-%d")
     
-   
     if accion == "Depositar en Banco":
         nuevo_estado = "depositado"
         destino = "Banco (Depósito)"
     else:
-        
         nuevo_estado = "entregado"
         destino = entregado_a
 
-    cursor.execute("""
-        UPDATE cheques
-        SET estado = ?, entregado_a = ?, fecha_entrega = ?
-        WHERE numero = ?
-    """, (nuevo_estado, destino, fecha_hoy, numero))
     
-    conexion.commit()
-    conexion.close()
-    print(f"Cheque N° {numero} actualizado a {nuevo_estado}.")
+    supabase.table("cheques").update({
+        "estado": nuevo_estado,
+        "entregado_a": destino,
+        "fecha_entrega": fecha_hoy
+    }).eq("numero", numero).execute()
 
 
 
 def listar_cheques():
-    conexion = sqlite3.connect("cheques.db")
-    cursor = conexion.cursor()
-    
-    cursor.execute("SELECT * FROM cheques")
-    cheques = cursor.fetchall()
-    
-    conexion.close()
-    return cheques
+    try:
+        
+        respuesta = supabase.table("cheques").select("*").execute()
+        cheques_data = respuesta.data
+        
+        if not cheques_data:
+            return []
+            
+     
+        lista_ordenada = []
+        for c in cheques_data:
+            lista_ordenada.append((
+                c.get("id"),
+                c.get("numero"),
+                c.get("tipo"),
+                c.get("emisor"),
+                c.get("banco"),
+                c.get("monto"),
+                c.get("fecha_emision"),
+                c.get("fecha_pago"),
+                c.get("estado"),
+                c.get("entregado_a"),
+                c.get("fecha_entrega")
+            ))
+        return lista_ordenada
+    except Exception:
+        return []
