@@ -1,18 +1,9 @@
 import datetime
-<<<<<<< HEAD
 from supabase import create_client, Client
 
 
 SUPABASE_URL = "https://ezwblubdgtmcucpyxulj.supabase.co"
 SUPABASE_KEY = "sb_publishable_-IdHxHC9-0yMOqQvwCVyTw_2blp9qQz"
-=======
-import streamlit as st  
-from supabase import create_client, Client
-
-
-SUPABASE_URL = st.secrets["SUPABASE_URL"]
-SUPABASE_KEY = st.secrets["SUPABASE_KEY"]
->>>>>>> 054fdea414702561f0a5d8852c3b0e9e55c9c396
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
@@ -20,7 +11,6 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 def registrar_cheque(numero, tipo, emisor, banco, monto, fecha_emision, fecha_pago):
     try:
-<<<<<<< HEAD
         # FORZAR CONVERSIÓN: Asegura que si viene como texto o float impreciso, 
         # se transforme en un flotante puro de Python (ej: 150000.0)
         monto_limpio = float(monto)
@@ -47,25 +37,6 @@ def registrar_cheque(numero, tipo, emisor, banco, monto, fecha_emision, fecha_pa
        
         return False, f"Error al registrar: Asegúrese de que el N° {numero} no esté repetido."
 
-=======
-      
-        supabase.table("cheques").insert({
-            "numero": numero,
-            "tipo": tipo,
-            "emisor": emisor,
-            "banco": banco,
-            "monto": monto,
-            "fecha_emision": fecha_emision,
-            "fecha_pago": fecha_pago,
-            "estado": "pendiente"
-        }).execute()
-        
-        return True, "Cheque registrado con éxito en la nube."
-        
-    except Exception as e:
-       
-        return False, f"Error al registrar: Asegúrese de que el N° {numero} no esté repetido."
->>>>>>> 054fdea414702561f0a5d8852c3b0e9e55c9c396
 
 
 def cambiar_estado_cheque(numero, accion, entregado_a=None):
@@ -89,22 +60,14 @@ def cambiar_estado_cheque(numero, accion, entregado_a=None):
 
 def listar_cheques():
     try:
-<<<<<<< HEAD
         
-=======
-       
->>>>>>> 054fdea414702561f0a5d8852c3b0e9e55c9c396
         respuesta = supabase.table("cheques").select("*").execute()
         cheques_data = respuesta.data
         
         if not cheques_data:
             return []
             
-<<<<<<< HEAD
      
-=======
-      
->>>>>>> 054fdea414702561f0a5d8852c3b0e9e55c9c396
         lista_ordenada = []
         for c in cheques_data:
             lista_ordenada.append((
@@ -122,8 +85,4 @@ def listar_cheques():
             ))
         return lista_ordenada
     except Exception:
-<<<<<<< HEAD
         return []
-=======
-        return []
->>>>>>> 054fdea414702561f0a5d8852c3b0e9e55c9c396
