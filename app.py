@@ -6,37 +6,24 @@ from main import registrar_cheque, listar_cheques, cambiar_estado_cheque
 st.set_page_config(page_title="Gestión de Cheques", page_icon="💰", layout="wide")
 
 
-usuario_actual = None
-
-try:
-    if st.experimental_user and st.experimental_user.get("email"):
-        usuario_actual = st.experimental_user
-    else:
-        
-        st.title("🔐 Acceso al Sistema de Cheques")
-        st.subheader("Por favor, inicia sesión para continuar")
-        st.info("Este sistema es privado y requiere autenticación previa.")
-        st.login("Iniciar Sesión")
-        st.stop()
-except AttributeError:
-  
-    usuario_actual = {"name": "Desarrollador Local", "email": "admin@local.com", "avatar": None}
-
-
-
+if not st.user.get("email"):
+    st.title("🔐 Acceso al Sistema de Cheques")
+    st.subheader("Por favor, inicia sesión para continuar")
+    st.info("Este sistema es privado y requiere autenticación previa.")
+    
+    st.login()  
 with st.sidebar:
-    if usuario_actual.get("avatar"):
-        st.image(usuario_actual.get("avatar"), width=70)
+    if st.user.get("avatar"):
+        st.image(st.user.get("avatar"), width=70)
     else:
         st.write("👤")
-    st.write(f"**Bienvenido, {usuario_actual.get('name')}!**")
-    st.write(f"✉️ {usuario_actual.get('email')}")
+    st.write(f"**Bienvenido, {st.user.get('name', 'Usuario')}!**")
+    st.write(f"✉️ {st.user.get('email')}")
     st.markdown("---")
-    
-    if usuario_actual.get("name") != "Desarrollador Local":
-        if st.button("🚪 Cerrar Sesión"):
-            st.logout()
-            st.rerun()
+    if st.button("🚪 Cerrar Sesión"):
+        st.logout()
+        st.rerun()
+
 
 st.title("🏦 Sistema de Gestión de Cheques")
 st.markdown("---")
