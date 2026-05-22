@@ -4,10 +4,15 @@ from main import registrar_cheque, listar_cheques, cambiar_estado_cheque
 
 st.set_page_config(page_title="Gestión de Cheques", page_icon="💰", layout="wide")
 
+
+if "code" in st.query_params or "state" in st.query_params:
+    for key in list(st.query_params.keys()):
+        del st.query_params[key]
+    st.rerun()
+
 if st.sidebar.button("🧹 Resetear Sesión en la Nube"):
     st.logout()
     st.rerun()
-
 
 if not st.user.get("email"):
     st.title("🔐 Acceso al Sistema de Cheques")
@@ -15,7 +20,7 @@ if not st.user.get("email"):
     st.info("Este sistema es privado y requiere autenticación previa.")
     
     st.login()  
-    st.stop()  
+    st.stop() 
 with st.sidebar:
     if st.user.get("avatar"):
         st.image(st.user.get("avatar"), width=70)
@@ -28,13 +33,11 @@ with st.sidebar:
         st.logout()
         st.rerun()
 
-
 st.title("🏦 Sistema de Gestión de Cheques")
 st.markdown("---")
 
 mis_cheques = listar_cheques()
 columnas = ["ID", "N° Cheque", "Tipo", "Emisor", "Banco Emisor", "Monto ($)", "F. Emisión", "F. Pago", "Estado", "Entregado a", "F. Entrega"]
-
 
 if mis_cheques and len(mis_cheques) > 0:
     df = pd.DataFrame(mis_cheques, columns=columnas)
@@ -47,16 +50,13 @@ tab_cartera, tab_registro, tab_operaciones = st.tabs(["📋 Ver Cartera", "➕ R
 
 with tab_cartera:
     if not df.empty:
-        
         df["Monto ($)"] = pd.to_numeric(df["Monto ($)"], errors='coerce').fillna(0)
         
-      
         total_monto = float(df["Monto ($)"].sum())
         pendientes = df[df["Estado"] == "pendiente"]
         total_pendiente = float(pendientes["Monto ($)"].sum()) if not pendientes.empty else 0.0
         cant_pendientes = len(pendientes)
         
-       
         total_monto_en_ars = f"$ {total_monto:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
         total_pendiente_en_ars = f"$ {total_pendiente:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
         
@@ -67,16 +67,13 @@ with tab_cartera:
 
         st.markdown("### Detalle de Cheques")
         
-        
         df_visual = df.drop(columns=["ID"]).copy()
-        
-        
         df_visual["Monto ($)"] = df_visual["Monto ($)"].apply(
             lambda x: f"$ {x:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
         )
         
         
-        st.dataframe(df_visual, use_container_width=True)
+        st.dataframe(df_visual, width="stretch")
         
     else:
         st.info("Aún no hay cheques registrados. ¡Empezá por la pestaña de registro!")
