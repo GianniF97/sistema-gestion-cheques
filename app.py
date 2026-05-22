@@ -5,11 +5,9 @@ from main import registrar_cheque, listar_cheques, cambiar_estado_cheque
 st.set_page_config(page_title="Gestión de Cheques", page_icon="💰", layout="wide")
 
 
-if "code" in st.query_params or "state" in st.query_params:
-    for key in list(st.query_params.keys()):
-        del st.query_params[key]
-    st.rerun()
 
+if "code" in st.query_params or "state" in st.query_params:
+    st.switch_page("app.py")  
 if st.sidebar.button("🧹 Resetear Sesión en la Nube"):
     st.logout()
     st.rerun()
