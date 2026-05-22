@@ -3,10 +3,44 @@ import streamlit as st
 from main import registrar_cheque, listar_cheques, cambiar_estado_cheque
 
 
-st.set_page_config(page_title="Gestión de Cheques", page_icon="", layout="wide")
+st.set_page_config(page_title="Gestión de Cheques", page_icon="💰", layout="wide")
 
-st.title(" Sistema de Gestión de Cheques")
+
+usuario_actual = None
+
+try:
+    if st.experimental_user and st.experimental_user.get("email"):
+        usuario_actual = st.experimental_user
+    else:
+        
+        st.title("🔐 Acceso al Sistema de Cheques")
+        st.subheader("Por favor, inicia sesión para continuar")
+        st.info("Este sistema es privado y requiere autenticación previa.")
+        st.login("Iniciar Sesión")
+        st.stop()
+except AttributeError:
+  
+    usuario_actual = {"name": "Desarrollador Local", "email": "admin@local.com", "avatar": None}
+
+
+
+with st.sidebar:
+    if usuario_actual.get("avatar"):
+        st.image(usuario_actual.get("avatar"), width=70)
+    else:
+        st.write("👤")
+    st.write(f"**Bienvenido, {usuario_actual.get('name')}!**")
+    st.write(f"✉️ {usuario_actual.get('email')}")
+    st.markdown("---")
+    
+    if usuario_actual.get("name") != "Desarrollador Local":
+        if st.button("🚪 Cerrar Sesión"):
+            st.logout()
+            st.rerun()
+
+st.title("🏦 Sistema de Gestión de Cheques")
 st.markdown("---")
+
 
 
 mis_cheques = listar_cheques()
