@@ -2,7 +2,6 @@ import pandas as pd
 import streamlit as st
 from main import registrar_cheque, listar_cheques, cambiar_estado_cheque
 
-
 st.set_page_config(page_title="Gestión de Cheques", page_icon="💰", layout="wide")
 
 if st.sidebar.button("🧹 Resetear Sesión en la Nube"):
@@ -16,6 +15,7 @@ if not st.user.get("email"):
     st.info("Este sistema es privado y requiere autenticación previa.")
     
     st.login()  
+    st.stop()  
 with st.sidebar:
     if st.user.get("avatar"):
         st.image(st.user.get("avatar"), width=70)
@@ -32,32 +32,31 @@ with st.sidebar:
 st.title("🏦 Sistema de Gestión de Cheques")
 st.markdown("---")
 
-
-
 mis_cheques = listar_cheques()
 columnas = ["ID", "N° Cheque", "Tipo", "Emisor", "Banco Emisor", "Monto ($)", "F. Emisión", "F. Pago", "Estado", "Entregado a", "F. Entrega"]
-df = pd.DataFrame(mis_cheques, columns=columnas)
 
+
+if mis_cheques and len(mis_cheques) > 0:
+    df = pd.DataFrame(mis_cheques, columns=columnas)
+else:
+    df = pd.DataFrame(columns=columnas)
 
 df["Monto ($)"] = pd.to_numeric(df["Monto ($)"], errors='coerce')
 
-
 tab_cartera, tab_registro, tab_operaciones = st.tabs(["📋 Ver Cartera", "➕ Registrar Cheque", "🔄 Cambiar Estado"])
-
 
 with tab_cartera:
     if not df.empty:
         
-        # 1. Asegurar que Pandas lo trate como número puro
         df["Monto ($)"] = pd.to_numeric(df["Monto ($)"], errors='coerce').fillna(0)
         
-        # 2. Calcular los totales matemáticos exactos
+      
         total_monto = float(df["Monto ($)"].sum())
         pendientes = df[df["Estado"] == "pendiente"]
-        total_pendiente = float(pendientes["Monto ($)"].sum())
+        total_pendiente = float(pendientes["Monto ($)"].sum()) if not pendientes.empty else 0.0
         cant_pendientes = len(pendientes)
         
-        # 3. Formatear las tarjetas métricas (Estilo Argentina: . para miles, , para decimales)
+       
         total_monto_en_ars = f"$ {total_monto:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
         total_pendiente_en_ars = f"$ {total_pendiente:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
         
@@ -68,28 +67,26 @@ with tab_cartera:
 
         st.markdown("### Detalle de Cheques")
         
-        # 4. CREAR UNA COPIA VISUAL Y FORMATEAR LA COLUMNA COMO STRING CONTROLADO
+        
         df_visual = df.drop(columns=["ID"]).copy()
         
-        # Forzamos el formato manualmente para evitar que el navegador lo altere
+        
         df_visual["Monto ($)"] = df_visual["Monto ($)"].apply(
             lambda x: f"$ {x:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
         )
         
-        # 5. Mostrar la tabla simple (ya que viene pre-formateada como texto limpio)
+        
         st.dataframe(df_visual, use_container_width=True)
         
     else:
         st.info("Aún no hay cheques registrados. ¡Empezá por la pestaña de registro!")
 
-
 with tab_registro:
     st.subheader("Cargar nuevo cheque a la cartera")
     
-    # MOSTRAR EL MENSAJE GUARDADO (si existe) DESPUÉS DEL REINICIO
     if "mensaje_exito" in st.session_state:
         st.success(st.session_state.mensaje_exito)
-        del st.session_state.mensaje_exito # Lo borramos para que no aparezca siempre
+        del st.session_state.mensaje_exito 
         
     with st.form("form_nuevo_cheque"):
         c1, c2 = st.columns(2)
@@ -108,12 +105,10 @@ with tab_registro:
         if btn_reg:
             exito, mensaje = registrar_cheque(numero, tipo, emisor, banco, monto, f_emision.strftime("%Y-%m-%d"), f_pago.strftime("%Y-%m-%d"))
             if exito:
-                # Guardamos el mensaje en la memoria de la sesión antes de reiniciar
                 st.session_state.mensaje_exito = mensaje
                 st.rerun()
             else:
                 st.error(mensaje)
-
 
 with tab_operaciones:
     st.subheader("Gestionar destino del cheque")
