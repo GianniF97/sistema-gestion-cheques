@@ -5,6 +5,10 @@ from main import registrar_cheque, listar_cheques, cambiar_estado_cheque
 
 st.set_page_config(page_title="Gestión de Cheques", page_icon="💰", layout="wide")
 
+if st.sidebar.button("🧹 Resetear Sesión en la Nube"):
+    st.logout()
+    st.rerun()
+
 
 if not st.user.get("email"):
     st.title("🔐 Acceso al Sistema de Cheques")
