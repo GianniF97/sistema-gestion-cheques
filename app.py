@@ -4,7 +4,7 @@ from main import registrar_cheque, listar_cheques, cambiar_estado_cheque
 
 st.set_page_config(page_title="Gestión de Cheques", page_icon="💰", layout="wide")
 
-# --- CONTROL DE ACCESO MANUAL (SALTEANDO EL BUG DE STREAMLIT) ---
+# --- CONTROL DE ACCESO MANUAL (INMUNE A MAYÚSCULAS) ---
 if "autenticado" not in st.session_state:
     st.session_state.autenticado = False
 
@@ -18,20 +18,20 @@ if not st.session_state.autenticado:
         btn_ingresar = st.form_submit_button("Iniciar Sesión")
         
         if btn_ingresar:
-            # Podés cambiar este correo y contraseña por los que vos quieras usar
-            if usuario == "GianniFerrari9789@gmail.com" and clave == "Cheques2026*":
+            # .lower() convierte lo que escribas a minúsculas, evitando errores si te olvidás las mayúsculas
+            if usuario.lower() == "gianniferrari9789@gmail.com" and clave == "Cheques2026*":
                 st.session_state.autenticado = True
                 st.success("¡Acceso concedido!")
                 st.rerun()
             else:
                 st.error("Usuario o contraseña incorrectos. Sistema privado.")
-    st.stop() # Frena el script acá si no se validó
+    st.stop() 
 
 # --- SIDEBAR ---
 with st.sidebar:
     st.write("👤")
     st.write(f"**Bienvenido, Gianni!**")
-    st.write(f"✉️ GianniFerrari9789@gmail.com")
+    st.write(f"✉️ gianniferrari9789@gmail.com")
     st.markdown("---")
     if st.button("🚪 Cerrar Sesión"):
         st.session_state.autenticado = False
