@@ -4,40 +4,40 @@ from main import registrar_cheque, listar_cheques, cambiar_estado_cheque
 
 st.set_page_config(page_title="Gestión de Cheques", page_icon="💰", layout="wide")
 
+# --- CONTROL DE ACCESO MANUAL (SALTEANDO EL BUG DE STREAMLIT) ---
+if "autenticado" not in st.session_state:
+    st.session_state.autenticado = False
 
-
-# 🔥 PARCHE DE REDIRECCIÓN AVANZADO (Para Streamlit v1.57)
-# Si quedamos atrapados en el callback de Google, forzamos la limpieza física de la barra
-if "code" in st.query_params or "state" in st.query_params:
-    st.components.v1.html(
-        """
-        <script>
-            window.top.location.href = "https://sistema-gestion-cheques.streamlit.app/";
-        </script>
-        """,
-        height=0
-    )
-    st.stop()
-
-if not st.user.get("email"):
+if not st.session_state.autenticado:
     st.title("🔐 Acceso al Sistema de Cheques")
-    st.subheader("Por favor, inicia sesión para continuar")
-    st.info("Este sistema es privado y requiere autenticación previa.")
+    st.subheader("Por favor, introduce tus credenciales para continuar")
     
-    st.login()  
-    st.stop() 
+    with st.form("form_login_privado"):
+        usuario = st.text_input("Usuario (Correo)")
+        clave = st.text_input("Contraseña", type="password")
+        btn_ingresar = st.form_submit_button("Iniciar Sesión")
+        
+        if btn_ingresar:
+            # Podés cambiar este correo y contraseña por los que vos quieras usar
+            if usuario == "GianniFerrari9789@gmail.com" and clave == "Cheques2026*":
+                st.session_state.autenticado = True
+                st.success("¡Acceso concedido!")
+                st.rerun()
+            else:
+                st.error("Usuario o contraseña incorrectos. Sistema privado.")
+    st.stop() # Frena el script acá si no se validó
+
+# --- SIDEBAR ---
 with st.sidebar:
-    if st.user.get("avatar"):
-        st.image(st.user.get("avatar"), width=70)
-    else:
-        st.write("👤")
-    st.write(f"**Bienvenido, {st.user.get('name', 'Usuario')}!**")
-    st.write(f"✉️ {st.user.get('email')}")
+    st.write("👤")
+    st.write(f"**Bienvenido, Gianni!**")
+    st.write(f"✉️ GianniFerrari9789@gmail.com")
     st.markdown("---")
     if st.button("🚪 Cerrar Sesión"):
-        st.logout()
+        st.session_state.autenticado = False
         st.rerun()
 
+# --- CUERPO PRINCIPAL DE LA APP ---
 st.title("🏦 Sistema de Gestión de Cheques")
 st.markdown("---")
 
@@ -76,7 +76,6 @@ with tab_cartera:
         df_visual["Monto ($)"] = df_visual["Monto ($)"].apply(
             lambda x: f"$ {x:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
         )
-        
         
         st.dataframe(df_visual, width="stretch")
         
