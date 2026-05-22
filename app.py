@@ -6,11 +6,18 @@ st.set_page_config(page_title="Gestión de Cheques", page_icon="💰", layout="w
 
 
 
+# 🔥 PARCHE DE REDIRECCIÓN AVANZADO (Para Streamlit v1.57)
+# Si quedamos atrapados en el callback de Google, forzamos la limpieza física de la barra
 if "code" in st.query_params or "state" in st.query_params:
-    st.switch_page("app.py")  
-if st.sidebar.button("🧹 Resetear Sesión en la Nube"):
-    st.logout()
-    st.rerun()
+    st.components.v1.html(
+        """
+        <script>
+            window.top.location.href = "https://sistema-gestion-cheques.streamlit.app/";
+        </script>
+        """,
+        height=0
+    )
+    st.stop()
 
 if not st.user.get("email"):
     st.title("🔐 Acceso al Sistema de Cheques")
