@@ -4,7 +4,7 @@ from main import registrar_cheque, listar_cheques, cambiar_estado_cheque
 
 st.set_page_config(page_title="Gestión de Cheques", page_icon="💰", layout="wide")
 
-# --- CONTROL DE ACCESO MANUAL (INMUNE A MAYÚSCULAS) ---
+
 if "autenticado" not in st.session_state:
     st.session_state.autenticado = False
 
@@ -18,7 +18,7 @@ if not st.session_state.autenticado:
         btn_ingresar = st.form_submit_button("Iniciar Sesión")
         
         if btn_ingresar:
-            # .lower() convierte lo que escribas a minúsculas, evitando errores si te olvidás las mayúsculas
+            
             if usuario.lower() == "gianniferrari9789@gmail.com" and clave == "Cheques2026*":
                 st.session_state.autenticado = True
                 st.success("¡Acceso concedido!")
@@ -27,7 +27,7 @@ if not st.session_state.autenticado:
                 st.error("Usuario o contraseña incorrectos. Sistema privado.")
     st.stop() 
 
-# --- SIDEBAR ---
+
 with st.sidebar:
     st.write("👤")
     st.write(f"**Bienvenido, Gianni!**")
@@ -37,7 +37,7 @@ with st.sidebar:
         st.session_state.autenticado = False
         st.rerun()
 
-# --- CUERPO PRINCIPAL DE LA APP ---
+
 st.title("🏦 Sistema de Gestión de Cheques")
 st.markdown("---")
 
